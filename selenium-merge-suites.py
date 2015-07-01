@@ -6,13 +6,13 @@ import sys
 import urllib 
 from lxml import html
 
+postfix='.html'
 
 #Format: OutputFile: [ list of suites or individual tests ]
 config={
     'testsAdmin':     ['loginAdmin',      'ViewTests', 'EditTests', 'AdmUsers'],
     'testsEditor':    ['loginEditor',     'ViewTests', 'EditTests'],
     'testsAnonymous': ['ViewTests', 'NoEditTests'],
-    
 }
 header="""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -33,16 +33,16 @@ footer="""</tbody></table>
 allTests=[]
 for output, suites in config.iteritems():
     for suite in suites:
-        suiteContent=html.fromstring(open(suite+'.html', 'r').read())
+        suiteContent=html.fromstring(open(suite+postfix, 'r').read())
         if suiteContent.xpath("//table[@id='suiteTable']"):
             for link in suiteContent.xpath("//a"):
                 file=link.get("href")
                 allTests.append({'name': link.text, 'file':file})
         elif suiteContent.xpath("/html/head[@profile='http://selenium-ide.openqa.org/profiles/test-case']"):
-            allTests.append({'name': str(suiteContent.xpath("/html/head/title/text()")[0]), 'file':suite+'.html'})
+            allTests.append({'name': str(suiteContent.xpath("/html/head/title/text()")[0]), 'file':suite+postfix})
         else:
             sys.stderr.write("Unknown file "+suite)
-    f=open(output+'.html', 'w')
+    f=open(output+postfix, 'w')
     f.write(header+'\n')
     for test in allTests:
         f.write('<tr><td><a href="'+test['file']+'">'+test['name']+'</a></td></tr>'+'\n')
